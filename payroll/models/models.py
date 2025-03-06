@@ -1042,13 +1042,13 @@ class Allowance(HorillaModel):
 
     def save(self):
         super().save()
-        if (
-            not self.include_active_employees
-            and not self.specific_employees.first()
-            and not self.is_condition_based
-        ):
-            self.include_active_employees = True
-            super().save()
+        # if (
+        #     not self.include_active_employees
+        #     and not self.specific_employees.first()
+        #     and not self.is_condition_based
+        # ):
+        #     self.include_active_employees = True
+        #     super().save()
 
 
 class Deduction(HorillaModel):
@@ -1744,6 +1744,9 @@ class Reimbursement(HorillaModel):
                     reimbursement.only_show_under_employee = True
                     reimbursement.include_active_employees = False
                     reimbursement.amount = self.amount
+                    # Will make reimbursement non taxable by default here,bonuspoint_encashment and leave_encashment will be taxable
+                    if self.type == "reimbursement":
+                        reimbursement.is_taxable = False
                     reimbursement.save()
                     reimbursement.include_active_employees = False
                     reimbursement.specific_employees.add(self.employee_id)
