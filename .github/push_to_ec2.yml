@@ -1,0 +1,34 @@
+name: Deploy HRMS
+on:
+  push: 
+    branches:
+      - fixed-master
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    runner-labels: ['self-hosted','Linux','ec2_aditya']
+    steps:
+      - name: Checkout Code
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+      - uses: actions/setup-python@v5
+      - with:
+          python-version: "3.11.9"
+
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Apply migrations
+        run: |
+          source venv/bin/activate
+          python manage.py migrate
+      
+      - name: Collect Static Files
+        run: |
+          source venv/bin/activate
+          python manage.py collectstatic --noinput
