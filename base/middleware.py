@@ -184,8 +184,8 @@ class ForcePasswordChangeMiddleware:
         if request.path.rstrip("/") in excluded_paths:
             return self.get_response(request)
 
-        if hasattr(request, "user") and request.user.is_authenticated:
-            if getattr(request.user, "is_new_employee", True):
-                return redirect("change-password")
+        # if hasattr(request, "user") and request.user.is_authenticated:
+        #     if getattr(request.user, "is_new_employee", True):
+        #         return redirect("change-password")
 
         return self.get_response(request)
