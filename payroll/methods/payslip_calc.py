@@ -454,7 +454,7 @@ def calculate_tax_deduction(*_args, **kwargs):
         deductions.exclude(one_time_date__lt=start_date)
         .exclude(one_time_date__gt=end_date)
         .exclude(update_compensation__isnull=False)
-    )
+    ).distinct()
     deductions_amt = []
     serialized_deductions = []
     for deduction in deductions:
