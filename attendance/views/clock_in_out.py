@@ -397,8 +397,33 @@ def clock_out_attendance_and_activity(employee, date_today, now, out_datetime=No
         # Validate the attendance as per the condition
         attendance.attendance_validated = attendance_validate(attendance)
         attendance.save()
-
         return attendance
+    else:
+        # If there is no check-in then it will come in this block, what we need to do is.
+        # Insert an activity with current time as both checkin and checkout.
+        attendance = Attendance.objects.filter(employee_id=employee).order_by(
+            "-attendance_date", "-id"
+        )[0]
+        AttendanceActivity.objects.create(
+            employee_id=attendance.employee_id,
+            attendance_date= date_today,
+            clock_in_date=attendance.attendance_clock_in_date,
+            clock_out_date=attendance.attendance_clock_in_date,
+            clock_in = out_datetime,
+            clock_out = out_datetime,
+            in_datetime = out_datetime,
+            out_datetime = out_datetime
+        )
+        duration = format_time(0)
+        # also we need to calculate the duration then and update the attendance with latest checkout then
+        attendance.attendance_clock_out = now + ":00"
+        attendance.attendance_clock_out_date = date_today
+        attendance.attendance_overtime = overtime_calculation(attendance)
+        attendance.attendance_validated = False
+        attendance.save()
+        return attendance
+
+
 
     logger.error("No attendance clock in activity found that needs clocking out.")
     return
