@@ -500,7 +500,7 @@ class Employee(models.Model):
 
         if employee.employee_user_id is None:
             # Create user if no corresponding user exists
-            username = self.email
+            username = self.email.split("@")[0]
             password = self.phone
 
             is_new_employee_flag = (
@@ -510,13 +510,13 @@ class Employee(models.Model):
             )
             user = User.objects.create_user(
                 username=username,
-                email=username,
+                email=self.email,
                 password=password,
                 is_new_employee=is_new_employee_flag,
             )
             if not user:
                 user = User.objects.create_user(
-                    username=username, email=username, password=password
+                    username=username, email=self.email, password=password
                 )
             self.employee_user_id = user
             # default permissions
@@ -524,6 +524,12 @@ class Employee(models.Model):
             view_ownprofile = Permission.objects.get(codename="view_ownprofile")
             user.user_permissions.add(view_ownprofile)
             user.user_permissions.add(change_ownprofile)
+        else:
+            user = self.employee_user_id
+            if prev_employee and prev_employee.email != self.email:
+                user.email = self.email  # Update email
+                user.username = self.email.split("@")[0]  # Update username
+                user.save()
 
         if not hasattr(self, "employee_work_info"):
             EmployeeWorkInformation.objects.get_or_create(employee_id=self)
