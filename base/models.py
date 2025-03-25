@@ -177,7 +177,7 @@ class JobRole(HorillaModel):
         JobPosition, on_delete=models.PROTECT, verbose_name=_("Job Position")
     )
     job_role = models.CharField(
-        max_length=50, blank=False, null=True, verbose_name=_("Job Role")
+        max_length=100, blank=False, null=True, verbose_name=_("Job Role")
     )
     company_id = models.ManyToManyField(Company, blank=True, verbose_name=_("Company"))
 
