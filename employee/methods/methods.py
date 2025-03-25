@@ -125,18 +125,19 @@ def bulk_create_user_import(success_lists):
     existing_usernames = {
         user.username
         for user in User.objects.filter(
-            username__in=[row["Email"] for row in success_lists]
+            username__in=[row["Email"].split("@")[0] for row in success_lists]
         )
     }
 
     for work_info in success_lists:
         email = work_info["Email"]
-        if email in existing_usernames:
+        username = email.split("@")[0]
+        if username in existing_usernames:
             continue
 
         phone = work_info["Phone"]
         user_obj = User(
-            username=email,
+            username=username,
             email=email,
             password=str(phone).strip(),
             is_superuser=False,
@@ -156,13 +157,14 @@ def bulk_create_employee_import(success_lists):
     existing_users = {
         user.username: user
         for user in User.objects.filter(
-            username__in=[row["Email"] for row in success_lists]
+            username__in=[row["Email"].split("@")[0] for row in success_lists]
         )
     }
 
     for work_info in success_lists:
         email = work_info["Email"]
-        user = existing_users.get(email)
+        username = email.split("@")[0]
+        user = existing_users.get(username)
         if not user:
             continue
 
