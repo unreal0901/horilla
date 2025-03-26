@@ -190,6 +190,27 @@ def _check_reporting_manager(request, *args, **kwargs):
             return False
     return request.user.employee_get.reporting_manager.exists()
 
+def _check_self_or_manager(request, *args, **kwargs):
+    """
+    Allow access if:
+    - The requesting user is the employee themselves
+    - The requesting user is the reporting manager of the employee
+    """
+    obj_id = kwargs.get("obj_id")
+    if not obj_id:
+        return False
+
+    try:
+        emp = Employee.objects.get(id=obj_id)
+    except Employee.DoesNotExist:
+        return False
+    
+    if request.user.employee_get == emp:
+        return True
+
+    return _check_reporting_manager(request, *args, **kwargs)
+
+
 
 # Create your views here.
 @login_required
@@ -294,7 +315,7 @@ def profile_edit_access(request, emp_id):
 @enter_if_accessible(
     feature="employee_detailed_view",
     perm="employee.view_employee",
-    method=_check_reporting_manager,
+    method=_check_self_or_manager,
 )
 def employee_view_individual(request, obj_id, **kwargs):
     """

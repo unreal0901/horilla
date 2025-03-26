@@ -13,23 +13,26 @@
     {% for notification in notifications %}
     <li class="oh-activity-sidebar__qa-item" id="notificationBodyItem{{notification.id}}">
         <div class="d-flex justify-content-between">
-            <span class="oh-activity-sidebar__q">
-                {{forloop.counter}}.
-                {% if notification.unread %}
-                    <span style="width: 10px;height: 10px;border-radius: 100%; background-color: hsl(8deg,77%,56%);display: inline-block;right: 5px;"></span>
-                {% endif %}
-                {% if LANGUAGE_CODE == 'ar' %}
-                    <p class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_ar }}</p>
-                {% elif LANGUAGE_CODE == 'de' %}
-                    <p class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_de }}</p>
-                {% elif LANGUAGE_CODE == 'fr' %}
-                    <p class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_fr }}</p>
-                {% elif LANGUAGE_CODE == 'es' %}
-                    <p class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_es }}</p>
-                {% else %}
-                    <p class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.verb }}</p>
-                {% endif %}
-            </span>
+            <a href="{{notification.data.redirect}}#"
+            id="notificationItem{{notification.id}}" data-id="{{notification.id}}">
+                <div class="oh-activity-sidebar__q">
+                    {{forloop.counter}}.
+                    {% if notification.unread %}
+                        <span style="width: 10px;height: 10px;border-radius: 100%; background-color: hsl(8deg,77%,56%);display: inline-block;right: 5px;"></span>
+                    {% endif %}
+                    {% if LANGUAGE_CODE == 'ar' %}
+                        <span class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_ar }}</span>
+                    {% elif LANGUAGE_CODE == 'de' %}
+                        <span class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_de }}</span>
+                    {% elif LANGUAGE_CODE == 'fr' %}
+                        <span class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_fr }}</span>
+                    {% elif LANGUAGE_CODE == 'es' %}
+                        <span class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.data.verb_es }}</span>
+                    {% else %}
+                        <span class="oh-navbar__notification-text" class="oh-navbar__notification-text--unread">{{ notification.verb }}</span>
+                    {% endif %}
+                </div>
+            </a>
             <div hx-on:click="setTimeout(() => {reloadMessage(this);},100);"
                 hx-target="#notificationBodyItem{{notification.id}}"
                 hx-post="{% url 'delete-notifications' notification.id %}" hx-swap="outerHTML">
@@ -38,9 +41,9 @@
             </div>
         </div>
         <span class="oh-activity-sidebar__a">
-            {{ notification.timesince }} {% trans "ago by" %}<img
+            {{ notification.timesince }} {% trans "ago by" %} &nbsp; <img
                 src="https://ui-avatars.com/api/?name={{notification.actor}}&amp;background=random"
-                style="width: 1.5em; border-radius: 100%;" alt="User"> {{notification.actor}}
+                style="width: 1.5em; border-radius: 100%;" alt="User"> &nbsp; {{notification.actor}}
         </span>
     </li>
     {% endfor %}
