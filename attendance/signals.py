@@ -13,59 +13,6 @@ from base.models import Company, PenaltyAccounts
 from employee.models import Employee
 from horilla.methods import get_horilla_model_class
 
-if apps.is_installed("payroll"):
-
-    @receiver(post_save, sender=PenaltyAccounts)
-    def create_initial_stage(sender, instance, created, **kwargs):
-        """
-        This is post save method, used to create initial stage for the recruitment
-        """
-        # only work when creating
-        if created:
-            penalty_amount = instance.penalty_amount
-            if penalty_amount:
-                Deduction = get_horilla_model_class(
-                    app_label="payroll", model="deduction"
-                )
-                penalty = Deduction()
-                if instance.late_early_id:
-                    penalty.title = (
-                        f"{instance.late_early_id.get_type_display()} penalty"
-                    )
-                    penalty.one_time_date = (
-                        instance.late_early_id.attendance_id.attendance_date
-                    )
-                elif instance.leave_request_id:
-                    penalty.title = (
-                        f"Leave penalty {instance.leave_request_id.end_date}"
-                    )
-                    penalty.one_time_date = instance.leave_request_id.end_date
-                else:
-                    penalty.title = f"Penalty on {datetime.today()}"
-                    penalty.one_time_date = datetime.today()
-                penalty.include_active_employees = False
-                penalty.is_fixed = True
-                penalty.amount = instance.penalty_amount
-                penalty.only_show_under_employee = True
-                penalty.save()
-                penalty.include_active_employees = False
-                penalty.specific_employees.add(instance.employee_id)
-                penalty.save()
-
-            if instance.leave_type_id and instance.minus_leaves:
-                available = instance.employee_id.available_leave.filter(
-                    leave_type_id=instance.leave_type_id
-                ).first()
-                unit = round(instance.minus_leaves * 2) / 2
-                if not instance.deduct_from_carry_forward:
-                    available.available_days = max(0, (available.available_days - unit))
-                else:
-                    available.carryforward_days = max(
-                        0, (available.carryforward_days - unit)
-                    )
-
-                available.save()
-
 
 @receiver(post_save, sender=Attendance)
 def attendance_post_save(sender, instance, **kwargs):
@@ -126,17 +73,10 @@ def attendance_post_save(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=Attendance)
-def attendance_pre_delete(sender, instance, **_kwargs):
-    """
-    Overriding Attendance model delete method
-    """
-    # Perform any actions before deleting the instance
-    # ...
-    WorkRecords.objects.filter(
-        employee_id=instance.employee_id,
-        is_attendance_record=True,
-        date=instance.attendance_date,
-    ).delete()
+def handle_attendance_deletion(sender, instance, **kwargs):
+    for workrecord in instance.workrecords_set.all():
+        if not workrecord.leave_request_id:
+            workrecord.delete()
 
 
 @receiver(post_migrate)
