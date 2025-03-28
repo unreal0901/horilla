@@ -210,8 +210,6 @@ def _check_self_or_manager(request, *args, **kwargs):
 
     return _check_reporting_manager(request, *args, **kwargs)
 
-
-
 # Create your views here.
 @login_required
 def get_language_code(request):
@@ -3359,6 +3357,7 @@ def redeem_points(request, emp_id):
 
 
 @login_required
+@manager_can_enter(perm='')
 def organisation_chart(request):
     """
     This method is used to view oganisation chart
