@@ -108,12 +108,8 @@ def organization_chart_accessibility(request, submenu, user_perms, *args, **kwar
     """
     Only allow managers (users with direct reports) to access the Organization Chart.
     """
-    employee = getattr(request.user, "employee_get", None)
+    # employee = getattr(request.user, "employee_get", None)
     if request.user.is_superuser or request.user.is_staff:
         return True    
     
-    if not employee:
-        return False
-    
-    reporting_manager = getattr(employee, "reporting_manager", None)
-    return reporting_manager is not None
+    return False
