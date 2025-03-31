@@ -114,5 +114,6 @@ def organization_chart_accessibility(request, submenu, user_perms, *args, **kwar
     
     if not employee:
         return False
-    print(employee.reporting_manager.exists())
-    return employee.reporting_manager.exists() 
+    
+    reporting_manager = getattr(employee, "reporting_manager", None)
+    return reporting_manager is not None
