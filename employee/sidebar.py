@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as trans
 
 from accessibility.methods import check_is_accessible
 from base.templatetags.basefilters import is_reportingmanager
+from .models import EmployeeWorkInformation
 
 MENU = trans("Employee")
 IMG_SRC = "images/ui/employees.svg"
@@ -108,8 +109,14 @@ def organization_chart_accessibility(request, submenu, user_perms, *args, **kwar
     """
     Only allow managers (users with direct reports) to access the Organization Chart.
     """
-    # employee = getattr(request.user, "employee_get", None)
+    employee = getattr(request.user, "employee_get", None)
     if request.user.is_superuser or request.user.is_staff:
-        return True    
+        return True
+    if not employee:
+        return False
     
-    return False
+    # Check if the employee is a manager (i.e., others report to them)    
+    is_manager = EmployeeWorkInformation.objects.filter(
+            reporting_manager_id=employee
+        ).exists()    
+    return is_manager
